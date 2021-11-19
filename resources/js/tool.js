@@ -1,11 +1,12 @@
-import Tool from "./components/Tool.vue";
+import CaddyAnalytics from "./components/CaddyAnalytics.vue";
+/* global Nova */
 
-Nova.booting((Vue, router, store) => {
+Nova.booting((_Vue, router) => {
   router.addRoutes([
     {
-      name: 'caddy-analytics',
-      path: '/caddy-analytics',
-      component: Tool,
+      name: "caddy-analytics",
+      path: "/caddy-analytics",
+      component: CaddyAnalytics,
     },
-  ])
-})
+  ]);
+});
