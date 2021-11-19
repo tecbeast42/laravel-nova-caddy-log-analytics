@@ -1,0 +1,63 @@
+variables:
+  COMPOSER_CACHE_DIR: .composer/
+  NODE_IMAGE: "node:16"
+  DOCKER_IMAGE: "docker"
+  RUNNER_IMAGE: registry.beastcoding.de/service/base-runner:v5.0.1
+  PHP_IMAGE: php:8
+  COMPOSER_IMAGE: composer:2.1.9
+  BUILD_IMAGE: registry.beastcoding.de/tecbeast.com/website
+  YARN_CACHE_DIR: "$CI_PROJECT_DIR/.cache/yarn"
+  DEPLOY_URL_PRODUCTION: https://gitlab.tecbeast.gmbh/api/v4/projects/206/trigger/pipeline
+
+cache:
+  key: "$CI_PROJECT_ID"
+  paths:
+    - .cache/yarn
+    - .composer/
+
+stages:
+  - install
+  - lint
+  - deploy
+
+yarn:
+  stage: install
+  image: $NODE_IMAGE
+  artifacts:
+    name: "$CI_JOB_ID-yarn"
+    paths:
+      - public/
+      - node_modules/
+    expire_in: 2h
+  script:
+    - yarn install --frozen-lockfile --cache-folder $YARN_CACHE_DIR
+    - yarn production
+
+phpcs:
+  stage: lint
+  image: registry.beastcoding.de/service/phpcs:v2.0.1
+  script:
+    - phpcs --standard=PSR2 app/
+
+eslint:
+  stage: lint
+  image: $NODE_IMAGE
+  script:
+    - yarn lint --no-fix --max-warnings=0
+
+review_app:
+  stage: deploy
+  image: $RUNNER_IMAGE
+  cache: {} # no cache
+  dependencies: [] # no artifacts
+  script:
+    - echo 'deploy to packagist'
+  # environment:
+  #   name: review/$CI_COMMIT_REF_NAME
+  #   url: https://$CI_ENVIRONMENT_SLUG.tecbeast-com.tecbeast.dev
+  #   auto_stop_in: 1 week
+  #   on_stop: stop_review_app
+  # only:
+  #   - branches
+  # except:
+  #   - master
