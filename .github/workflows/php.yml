@@ -17,6 +17,9 @@ jobs:
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
 
+    - name: Grant access to nova package
+      run: composer config http-basic.nova.laravel.com ${{ secrets.NOVA_USERNAME }} ${{ NOVA_PASSWORD }}
+
     - name: Cache Composer packages
       id: composer-cache
       uses: actions/cache@v2
